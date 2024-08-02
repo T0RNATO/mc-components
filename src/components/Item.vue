@@ -29,16 +29,16 @@ function toTitle(str: string): string {
         {{item}}
     </span>
 </div>
-<div class="bg-gray-800 w-full py-4 flex flex-col justify-center gap-6 text-white" :style="{order: Math.ceil((i + 1) / 13) * 13}" v-if="active">
-    <div class="flex justify-center gap-x-8">
+<div class="bg-gray-800 w-full py-4 text-white flex justify-center" :style="{order: Math.ceil((i + 1) / 13) * 13}" v-if="active">
+    <div class="components">
         <div class="flex flex-row items-center gap-x-2">
             <img :src="url" :alt="item" v-if="url"/>
             <div>
                 <span class="text-md font-semibold mt-2 block">{{item}}</span>
-                <span class="text-xs mt-2 text-gray-300">{{id}}</span>
+                <span class="text-sm mt-2 text-gray-500">{{id}}</span>
             </div>
         </div>
-        <div class="grid grid-cols-3 gap-x-2 border-gray-500 px-8 highlight border-l-2">
+        <div class="grid grid-cols-3 gap-x-2 highlight">
             <span>Max Stack Size:</span><span>{{components["minecraft:max_stack_size"]}}</span>
             <span>minecraft:max_stack_size</span>
             <span>Rarity:</span><span :class="components['minecraft:rarity']">{{toTitle(components["minecraft:rarity"])}}</span>
@@ -52,35 +52,60 @@ function toTitle(str: string): string {
                 <span>minecraft:fire_resistant</span>
             </template>
         </div>
-    </div>
-    <div class="flex justify-center" v-if="components['minecraft:attribute_modifiers'].modifiers.length">
-        <div class="grid grid-cols-4 gap-x-2">
-            <template v-for="modifier in components['minecraft:attribute_modifiers'].modifiers">
-                <div class="border-r-2 border-gray-500 pr-6">
-                    <span class="font-semibold block">{{lang['attribute.name.' + modifier.type.split(':')[1]]}}</span>
-                    <span class="text-gray-500 text-sm">{{modifier.type}}</span>
-                </div>
-                <div class="pl-6">Affects: <span class="font-semibold">{{modifier.slot}}</span></div>
-                <div>Operation: <span class="font-semibold">{{modifier.operation}}</span></div>
-                <div>
-                    <div class="block">Amount: <span class="font-semibold">{{Math.round(modifier.amount * 1000) / 1000}}</span></div>
-                    <span class="text-gray-500 text-sm" v-if="modifier.operation == 'add_value'">
-                        Base {{Math.sign(modifier.amount) == 1 ? '+' : '-'}}
-                        {{Math.round(Math.abs(modifier.amount) * 1000) / 1000}}
-                    </span>
-                    <span class="text-gray-500 text-sm" v-else>
-                        Base × {{Math.round(modifier.amount * 1000) / 1000 + 1}}
-                    </span>
-                </div>
-            </template>
-        </div>
+        <template v-if="components['minecraft:attribute_modifiers'].modifiers.length"
+                  v-for="modifier in components['minecraft:attribute_modifiers'].modifiers">
+            <div>
+                <span class="font-semibold block">{{lang['attribute.name.' + modifier.type.split(':')[1]]}}</span>
+                <span class="text-gray-500 text-sm">{{modifier.type}}</span>
+            </div>
+            <div class="grid grid-cols-3 gap-x-2 highlight">
+                <span>Affects:</span>
+                <span>{{modifier.slot}}</span>
+                <span></span>
+                <span>Operation: </span>
+                <span>{{modifier.operation}}</span>
+                <span></span>
+                <span>Amount:</span>
+                <span>{{Math.round(modifier.amount * 1000) / 1000}}</span>
+                <span v-if="modifier.operation == 'add_value'">
+                    Base {{Math.sign(modifier.amount) == 1 ? '+' : '-'}}
+                    {{Math.round(Math.abs(modifier.amount) * 1000) / 1000}}
+                </span>
+                <span v-else>
+                    Base × {{Math.round(modifier.amount * 1000) / 1000 + 1}}
+                </span>
+            </div>
+        </template>
+        <template v-if="components['minecraft:tool']"
+                  v-for="rule in components['minecraft:tool']!.rules">
+            <div>
+                <span class="font-semibold block">{{rule.blocks}}</span>
+            </div>
+            <div class="grid grid-cols-3 gap-x-2 highlight">
+                <template v-if="rule.speed">
+                    <span>Speed: </span>
+                    <span>{{rule.speed}}</span>
+                    <span></span>
+                </template>
+                <span>Drops items:</span>
+                <span>{{rule.correct_for_drops}}</span>
+                <span>correct_for_drops</span>
+            </div>
+        </template>
     </div>
 </div>
 </template>
 
+<!--suppress CssUnusedSymbol -->
 <style scoped>
 .item {
     @apply p-2 rounded-md bg-gray-800 w-[7%] flex justify-center flex-col cursor-pointer hover:bg-gray-700 transition-colors;
+}
+.components {
+    @apply grid grid-cols-2 justify-center gap-6;
+    > div:nth-child(odd) {
+        @apply border-r-2 border-gray-500 pr-6
+    }
 }
 .highlight {
     > span:nth-child(3n+1) {
