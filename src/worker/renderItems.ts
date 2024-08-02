@@ -62,6 +62,7 @@ class ResourceManager implements Resources {
             // 2048 should be changed (w,h,w,h)
             idMap[Identifier.create(id).toString()] = [u / 2048, v / 2048, (u + du) / 2048, (v + dv2) / 2048];
         })
+        console.log(imageData);
         this.textureAtlas = new TextureAtlas(imageData, idMap)
     }
 }

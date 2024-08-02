@@ -3,6 +3,7 @@ import {computed, type Ref, ref} from "vue";
 // @ts-ignore
 import RenderItemsWorker from "./worker/renderItems.ts?worker";
 import Item from "./components/Item.vue";
+import {ItemComponents} from "~/types.ts";
 
 const mcmetaUrl = 'https://raw.githubusercontent.com/misode/mcmeta'
 
@@ -29,53 +30,50 @@ async function getImageData(src: string) {
 }
 
 async function getDefaultComponents() {
-    const response = await fetch('https://raw.githubusercontent.com/misode/mcmeta/summary/item_components/data.json.gz',
-                        { headers: { 'Content-Encoding': 'gzip' } });
+    const response = await fetch(`${mcmetaUrl}/summary/item_components/data.json.gz`,
+                        { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0' } });
     const gzip = new DecompressionStream('gzip');
-    const stream = response.body.pipeThrough(gzip);
+    const stream = response.body!.pipeThrough(gzip);
     const decompressedStream = new Response(stream);
     return decompressedStream.json();
 }
 
 const resources = new Promise<Object[]>(async (res) => {
-    let blockDefinitions, blockModels, uvMappings, atlas, lang, items;
+    let blockDefinitions, blockModels, uvMappings, atlas, lang, components, items;
 
     if (import.meta.env.DEV) {
         // don't spam network requests
-        [blockDefinitions, blockModels, uvMappings, items, lang, atlas] = await Promise.all([ // @ts-ignore
-            import('/src/assets/dev/block_definition.json'), // @ts-ignore
-            import('/src/assets/dev/model_data.json'), // @ts-ignore
-            import('/src/assets/dev/atlas.json'), // @ts-ignore
-            import('/src/assets/dev/items.json'), // @ts-ignore
-            import('/src/assets/dev/lang.json'),
+        [blockDefinitions, blockModels, uvMappings, items, lang, components, atlas] = (await Promise.all([ // @ts-ignore
+            import('~/assets/dev/block_definition.json'), // @ts-ignore
+            import('~/assets/dev/model_data.json'), // @ts-ignore
+            import('~/assets/dev/atlas.json'), // @ts-ignore
+            import('~/assets/dev/items.json'), // @ts-ignore
+            import('~/assets/dev/lang.json'), // @ts-ignore
+            import('~/assets/dev/components.json'),
             getImageData(`${mcmetaUrl}/atlas/all/atlas.png`),
-        ])
-
-        blockDefinitions = blockDefinitions.default;
-        blockModels = blockModels.default;
-        uvMappings = uvMappings.default;
-        itemIds.value = items.default;
+        ])).map((el) => el.default ?? el);
     } else {
-        [blockDefinitions, blockModels, uvMappings, items, lang, atlas] = await Promise.all([
+        [blockDefinitions, blockModels, uvMappings, items, lang, components, atlas] = await Promise.all([
             getMcMeta('summary/assets/block_definition'),
             getMcMeta('summary/assets/model'),
             getMcMeta('summary/atlas/all'),
             getMcMeta('registries/item'),
             getMcMeta('assets/assets/minecraft/lang', 'en_us.json'),
+            getDefaultComponents(),
             getImageData(`${mcmetaUrl}/atlas/all/atlas.png`),
         ])
-        itemIds.value = items;
     }
+    itemIds.value = items;
+    itemComponents.value = components;
+    langFile.value = lang;
 
-    langFile = lang.default;
-
-    console.log([blockDefinitions, blockModels, uvMappings, atlas]);
     res([blockDefinitions, blockModels, uvMappings, atlas]);
 })
 
-let langFile: Record<string, string> = {};
+const langFile: Ref<Record<string, string>> = ref({});
 const itemIds: Ref<string[]> = ref([]);
 const itemURLS: Ref<Record<string, string>> = ref({});
+const itemComponents: Ref<Record<string, ItemComponents>> = ref({});
 
 const canvas = document.createElement('canvas');
 canvas.width = canvas.height = 64;
@@ -86,6 +84,7 @@ resources.then((resources) => {
     // _rawValue is undocumented but is a reference to the non-proxied value (the proxy cannot be transferred)
     // @ts-ignore
     worker.postMessage({canvas: offscreen, ids: itemIds._rawValue, resources}, [offscreen]);
+    console.log(resources);
     worker.onmessage = (msg) => {
         const {item, url} = msg.data;
         itemURLS.value[item] = url;
@@ -112,6 +111,8 @@ const searchTerm = computed(() => {
               :key="item"
               :search="searchTerm"
               :id="item"
+              :components="itemComponents[item]"
+              :lang="langFile"
               :i="i"
               v-for="(item, i) in itemIds"
         />
