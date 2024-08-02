@@ -56,7 +56,7 @@ const resources = new Promise<Object[]>(async (res) => {
         [blockDefinitions, blockModels, uvMappings, items, lang, components, atlas] = await Promise.all([
             getMcMeta('summary/assets/block_definition'),
             getMcMeta('summary/assets/model'),
-            getMcMeta('summary/atlas/all'),
+            getMcMeta('atlas/all'),
             getMcMeta('registries/item'),
             getMcMeta('assets/assets/minecraft/lang', 'en_us.json'),
             getDefaultComponents(),
@@ -84,17 +84,11 @@ resources.then((resources) => {
     // _rawValue is undocumented but is a reference to the non-proxied value (the proxy cannot be transferred)
     // @ts-ignore
     worker.postMessage({canvas: offscreen, ids: itemIds._rawValue, resources}, [offscreen]);
-    console.log(resources);
     worker.onmessage = (msg) => {
         const {item, url} = msg.data;
         itemURLS.value[item] = url;
     }
 })
-
-function log<T extends any>(arg: T): T {
-    console.log(arg);
-    return arg;
-}
 
 const inputValue = ref('');
 const searchResults = computed(() => {
@@ -107,9 +101,17 @@ const searchResults = computed(() => {
 </script>
 
 <template>
-    <div class="flex w-full justify-center p-2">
-        <input type="text"
-               class="bg-gray-700 p-2 text-xl text-white hover:bg-gray-600 transition-colors rounded-md w-1/3"
+    <div class="flex w-full items-center p-2 text-white flex-col">
+        <h1 class="text-5xl font-bold">Item Default Component Viewer</h1>
+        <p class="text-center my-6">
+            Search for an item or scroll down to it, and click it to view its information.
+            <br/>
+            Would not have been possible without the incredible work of Misode on both
+            <a href="https://github.com/misode/deepslate">Deepslate</a> and
+            <a href="https://github.com/misode/mcmeta">mcmeta</a>.
+        </p>
+        <input type="text" placeholder="Search here..."
+               class="bg-gray-700 p-2 text-xl hover:bg-gray-600 transition-colors rounded-md w-1/3"
                v-model="inputValue"
         >
     </div>
