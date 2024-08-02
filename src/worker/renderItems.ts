@@ -70,6 +70,7 @@ class ResourceManager implements Resources {
 self.onmessage = async (msg) => {
     const {resources, ids, canvas} = msg.data as
         {canvas: OffscreenCanvas, resources: Object, ids: string[]};
+    // @ts-ignore
     const manager = new ResourceManager(...resources);
     const gl = canvas.getContext('webgl')!;
     const renderer = new ItemRenderer(gl, new Identifier('minecraft', 'air'), manager);

@@ -51,7 +51,7 @@ const resources = new Promise<Object[]>(async (res) => {
             import('~/assets/dev/lang.json'), // @ts-ignore
             import('~/assets/dev/components.json'),
             getImageData(`${mcmetaUrl}/atlas/all/atlas.png`),
-        ])).map((el) => el.default ?? el);
+        ])).map((el: {default: any}) => el.default ?? el);
     } else {
         [blockDefinitions, blockModels, uvMappings, items, lang, components, atlas] = await Promise.all([
             getMcMeta('summary/assets/block_definition'),
@@ -91,9 +91,18 @@ resources.then((resources) => {
     }
 })
 
+function log<T extends any>(arg: T): T {
+    console.log(arg);
+    return arg;
+}
+
 const inputValue = ref('');
-const searchTerm = computed(() => {
-    return inputValue.value.toLowerCase();
+const searchResults = computed(() => {
+    const term = inputValue.value.toLowerCase();
+    return itemIds.value.filter((item) => {
+        const translated = langFile.value[`item.minecraft.${item}`] ?? langFile.value[`block.minecraft.${item}`] ?? '';
+        return translated.toLowerCase().includes(term);
+    });
 })
 </script>
 
@@ -105,20 +114,14 @@ const searchTerm = computed(() => {
         >
     </div>
     <div class="flex flex-wrap gap-2 p-2">
-        <!--todo: update `i` when search term present-->
         <Item :item="langFile[`item.minecraft.${item}`] ?? langFile[`block.minecraft.${item}`] ?? ''"
               :url="itemURLS[item]"
               :key="item"
-              :search="searchTerm"
               :id="item"
               :components="itemComponents[item]"
               :lang="langFile"
               :i="i"
-              v-for="(item, i) in itemIds"
+              v-for="(item, i) in searchResults"
         />
     </div>
 </template>
-
-<style scoped>
-
-</style>

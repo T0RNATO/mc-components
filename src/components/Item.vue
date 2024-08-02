@@ -5,7 +5,6 @@ import {ItemComponents} from "~/types.ts";
 defineProps<{
     url: string | undefined,
     item: string,
-    search: string,
     i: number,
     id: string,
     lang: Record<string, string>,
@@ -20,7 +19,7 @@ function toTitle(str: string): string {
 </script>
 
 <template>
-<div class="item" v-if="item.toLowerCase().includes(search)" @click="active = !active" :style="{order: i}">
+<div class="item" @click="active = !active" :style="{order: i}">
     <img :src="url" :alt="item" v-if="url"/>
     <div v-else class="text-gray-500 font-semibold w-full text-center">
         Loading...
@@ -79,7 +78,8 @@ function toTitle(str: string): string {
         <template v-if="components['minecraft:tool']"
                   v-for="rule in components['minecraft:tool']!.rules">
             <div>
-                <span class="font-semibold block">{{rule.blocks}}</span>
+                <span class="font-semibold block">Tool Rule</span>
+                <span class="text-gray-500 text-sm">{{rule.blocks}}</span>
             </div>
             <div class="grid grid-cols-3 gap-x-2 highlight">
                 <template v-if="rule.speed">
@@ -99,7 +99,7 @@ function toTitle(str: string): string {
 <!--suppress CssUnusedSymbol -->
 <style scoped>
 .item {
-    @apply p-2 rounded-md bg-gray-800 w-[7%] flex justify-center flex-col cursor-pointer hover:bg-gray-700 transition-colors;
+    @apply p-2 rounded-md bg-gray-800 w-[7.25%] flex justify-center flex-col cursor-pointer hover:bg-gray-700 transition-colors;
 }
 .components {
     @apply grid grid-cols-2 justify-center gap-6;
