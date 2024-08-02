@@ -9,4 +9,5 @@ export default defineConfig({
     },
   },
   plugins: [vuePlugin()],
+  base: 'https://t0rnato.github.io/mc-components/'
 });
