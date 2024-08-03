@@ -31,7 +31,7 @@ async function getImageData(src: string) {
 
 async function getDefaultComponents() {
     const response = await fetch(`${mcmetaUrl}/summary/item_components/data.json.gz`,
-                        { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 Edg/127.0.0.0' } });
+                        { headers: { 'User-Agent': navigator.userAgent } });
     const gzip = new DecompressionStream('gzip');
     const stream = response.body!.pipeThrough(gzip);
     const decompressedStream = new Response(stream);
@@ -98,11 +98,17 @@ const searchResults = computed(() => {
         return translated.toLowerCase().includes(term);
     });
 })
+
+const itemsPerRow = ref(Math.round(window.innerWidth / 100) - 1);
+
+window.addEventListener('resize', () => {
+    itemsPerRow.value = Math.round(window.innerWidth / 100) - 1;
+})
 </script>
 
 <template>
     <div class="flex w-full items-center p-2 text-white flex-col">
-        <h1 class="text-5xl font-bold">Item Default Component Viewer</h1>
+        <h1 class="text-5xl font-bold text-center">Item Default Component Viewer</h1>
         <p class="text-center my-6">
             Search for an item or scroll down to it, and click it to view its information.
             <br/>
@@ -111,11 +117,11 @@ const searchResults = computed(() => {
             <a href="https://github.com/misode/mcmeta">mcmeta</a>.
         </p>
         <input type="text" placeholder="Search here..."
-               class="bg-gray-700 p-2 text-xl hover:bg-gray-600 transition-colors rounded-md w-1/3"
+               class="bg-gray-700 p-2 text-xl hover:bg-gray-600 transition-colors rounded-md w-full md:w-1/3"
                v-model="inputValue"
         >
     </div>
-    <div class="flex flex-wrap gap-2 p-2">
+    <div class="flex flex-wrap gap-2 p-2 justify-center">
         <Item :item="langFile[`item.minecraft.${item}`] ?? langFile[`block.minecraft.${item}`] ?? ''"
               :url="itemURLS[item]"
               :key="item"
@@ -123,6 +129,7 @@ const searchResults = computed(() => {
               :components="itemComponents[item]"
               :lang="langFile"
               :i="i"
+              :itemsPerRow="itemsPerRow"
               v-for="(item, i) in searchResults"
         />
     </div>

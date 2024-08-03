@@ -9,6 +9,7 @@ defineProps<{
     id: string,
     lang: Record<string, string>,
     components: ItemComponents,
+    itemsPerRow: number,
 }>();
 
 const active = ref(false);
@@ -19,7 +20,7 @@ function toTitle(str: string): string {
 </script>
 
 <template>
-<div class="item" @click="active = !active" :style="{order: i}">
+<div class="item" @click="active = !active" :style="{order: i}" :class="{active}">
     <img :src="url" :alt="item" v-if="url"/>
     <div v-else class="text-gray-500 font-semibold w-full text-center">
         Loading...
@@ -28,7 +29,7 @@ function toTitle(str: string): string {
         {{item}}
     </span>
 </div>
-<div class="bg-gray-800 w-full py-4 text-white flex justify-center" :style="{order: Math.ceil((i + 1) / 13) * 13}" v-if="active">
+<div class="bg-gray-800 w-full py-4 text-white flex justify-center" :style="{order: Math.ceil((i + 1) / itemsPerRow) * itemsPerRow}" v-if="active">
     <div class="components">
         <div class="flex flex-row items-center gap-x-2">
             <img :src="url" :alt="item" v-if="url"/>
@@ -99,12 +100,15 @@ function toTitle(str: string): string {
 <!--suppress CssUnusedSymbol -->
 <style scoped>
 .item {
-    @apply p-2 rounded-md bg-gray-800 w-[7.25%] flex justify-center flex-col cursor-pointer hover:bg-gray-700 transition-colors;
+    @apply p-2 rounded-md bg-gray-800 w-[100px] flex justify-center flex-col cursor-pointer hover:bg-gray-700 transition-colors;
 }
 .components {
-    @apply grid grid-cols-2 justify-center gap-6;
+    @apply flex flex-col md:grid md:grid-cols-2 md:justify-center items-center gap-6 px-2;
     > div:nth-child(odd) {
-        @apply border-r-2 border-gray-500 pr-6
+        @apply md:border-r-2 max-sm:border-b-2 border-gray-500 md:pr-6 max-sm:pb-6
+    }
+    > div {
+        @apply max-sm:w-full
     }
 }
 .highlight {
@@ -112,8 +116,11 @@ function toTitle(str: string): string {
         @apply font-semibold;
     }
     > span:nth-child(3n) {
-        @apply text-gray-500;
+        @apply text-gray-500 max-sm:text-xs;
     }
+}
+.active {
+    @apply bg-gray-700;
 }
 .uncommon { color: #FFFF55; }
 .rare { color: #55FFFF; }
