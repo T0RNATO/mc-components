@@ -99,10 +99,10 @@ const searchResults = computed(() => {
     });
 })
 
-const itemsPerRow = ref(Math.round(window.innerWidth / 100) - 1);
+const itemsPerRow = ref(Math.floor(window.innerWidth / 100) - 1);
 
 window.addEventListener('resize', () => {
-    itemsPerRow.value = Math.round(window.innerWidth / 100) - 1;
+    itemsPerRow.value = Math.floor(window.innerWidth / 100) - 1;
 })
 </script>
 
