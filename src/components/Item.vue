@@ -93,6 +93,28 @@ function toTitle(str: string): string {
                 <span>correct_for_drops</span>
             </div>
         </template>
+        <template v-if="components['minecraft:food']">
+            <div>
+                <span class="font-semibold block">Food</span>
+                <span class="text-gray-500 text-sm">minecraft:food</span>
+            </div>
+            <div class="grid grid-cols-3 gap-x-2 highlight">
+                <span>Nutrition:</span>
+                <span>{{components['minecraft:food'].nutrition}}</span>
+                <span></span>
+                <span>Saturation:</span>
+                <span>{{components['minecraft:food'].saturation}}</span>
+                <span></span>
+                <span>Can eat regardless of hunger:</span>
+                <span>{{components['minecraft:food'].can_always_eat ?? false}}</span>
+                <span>can_always_eat</span>
+                <template v-if="components['minecraft:food'].using_converts_to">
+                    <span>Converts to when eaten: </span>
+                    <span>{{components['minecraft:food'].using_converts_to.id}}</span>
+                    <span>using_converts_to</span>
+                </template>
+            </div>
+        </template>
     </div>
 </div>
 </template>

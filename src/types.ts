@@ -23,4 +23,12 @@ export type ItemComponents = {
             "speed"?: number
         }[]
     },
+    "minecraft:food": {
+        "nutrition": number,
+        "saturation": number,
+        "can_always_eat"?: boolean,
+        "using_converts_to"?: {
+            "id": string;
+        }
+    },
 }
